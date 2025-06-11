@@ -1,45 +1,62 @@
-TARGET = san_winapi_gui.dll
-BUILDFOLDER = build
-STATICFOLDER = static
-CC =x86_64-w64-mingw32-g++
+DYNAMICTARGET = sab_winui.dll
+STATICTARGET = libsab_winui.a
+IMPORTTARGET = libsab_winui.dll.a
+BUILD_DIR = build
+BUILD_DYNAMIC_DIR = $(BUILD_DIR)/dynamic
+BUILD_STATIC_DIR = $(BUILD_DIR)/static
 
-STATICLIBNAME = libsan_winapi_gui.a
-LIPSPECIFIC = -DSAN_WINAPI_GUI_EXPORTS
+CC_DYNAMIC = x86_64-w64-mingw32-g++
+CC_STATIC = ar rcs
+INCLUDE_DIR = include
+INCLUDE_PATH = $(INCLUDE_DIR)/
+SRC_PATH = src/
+
+
+LIBEXPORT = -DSAB_WINUI_LIB_EXPORT
+CINCLUDE = -I$(INCLUDE_DIR)
+AVOIDMINGWDYNAMIC = -static
 CFLAGS = -std=c++17 \
          -O0 -D_FORTIFY_SOURCE=2 -fstack-protector \
 		 -Wall -Wextra -Werror -Wshadow \
-		 $(LIPSPECIFIC)
-LDFLAGS = -Wl,--out-implib,$(STATICLIBNAME) -shared 
+		 $(LIBEXPORT) \
+		 $(CINCLUDE)
+		
+LDFLAGS = -shared $(AVOIDMINGWDYNAMIC) -Wl,--out-implib,$(BUILD_DYNAMIC_DIR)/$(IMPORTTARGET)
+#LDFLAGS_STATIC = -Wl,--out-implib,$(STATICTARGET)
 # $(AVOIDMINGWDYNAMIC) $(WINAPILIBS) $(WINAPIRELATED)
-MMAIN = san_winapi_gui.cpp san_winapi_gui.hpp 
 
+
+MMAIN = ui/WindowBase.cpp sab/ui/WindowBase.hpp 
+ 
 MODULES = $(MMAIN)
 
-CPP = $(filter %.cpp,$(MODULES))
-HEADERS = $(filter %.hpp %.h,$(MODULES))
+CPP = $(addprefix $(SRC_PATH),$(filter %.cpp,$(MODULES)))
+HEADERS = $(addprefix $(INCLUDE_PATH),$(filter %.hpp %.h,$(MODULES)))
 OBJECTS = $(patsubst %.cpp,%.o,$(CPP))
 
 
-.PHONY: all clean
+.PHONY: all clean static dynamic
 
-all: $(TARGET) static_move
+all: dynamic static
 
-$(TARGET): $(OBJECTS) | $(BUILDFOLDER)
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $(BUILDFOLDER)/$(TARGET)  
+dynamic: $(OBJECTS) | $(BUILD_DYNAMIC_DIR)
+	$(CC_DYNAMIC) $(OBJECTS) $(LDFLAGS) -o $(BUILD_DYNAMIC_DIR)/$(DYNAMICTARGET)  
+
+static: $(OBJECTS) | $(BUILD_STATIC_DIR)
+	$(CC_STATIC) $(BUILD_STATIC_DIR)/$(STATICTARGET) $(OBJECTS) 
 
 $(OBJECTS): %.o: %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-static_move: $(STATICLIBNAME) | $(STATICFOLDER)
-	mv $(STATICLIBNAME) $(STATICFOLDER)
 clean:
 	rm -f $(OBJECTS)
-	rm -f $(BUILDFOLDER)/$(TARGET)
-	rm -f  $(STATICFOLDER)/$(STATICLIBNAME)
+	rm -rf $(BUILD_DIR)
 
+$(BUILD_DIR):
+	mkdir -p  $(BUILD_DIR)
 
-$(BUILDFOLDER):
-	mkdir build
+$(BUILD_DYNAMIC_DIR): $(BUILD_DIR)
+	mkdir -p $(BUILD_DYNAMIC_DIR)
 
-$(STATICFOLDER):
-	mkdir static
+$(BUILD_STATIC_DIR): $(BUILD_DIR)
+	mkdir -p  $(BUILD_STATIC_DIR)
