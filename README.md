@@ -1,42 +1,68 @@
 # WinApi-Gui-OOP
-## Easy to setup wrapped WinApi library, for OOP integration and c++17 standard matching 
-### Compile source
-- Required:
+### Easy to setup wrapped WinApi library, for OOP integration and c++17 standard matching 
+## Compile source
+### Required:
 >MinGW compiler toolchain (e.g., g++).
-- Process:
-***
+### Process:
+#### dynamic + static
+```bash
 Make
-***
->>result into creating libraries: static: static/libsan_winapi_gui.a, dynamic: build/san_winapi_gui.dll
-### Use
-- Compile your project:
-***
-g++ -o app.exe main.cpp -L(OMG) [^1] -lsan_winapi_gui -luser32
-***
-- Code integration:
 ```
-#include "StunAndBlock/WINAPI-GUI-OOP/san_winapi_gui.hpp"
-class MyGui : private BaseGui {
+#### <sub>only for dynamic</sub>
+```bash
+Make dynamic
+```
+#### only for static
+```bash
+Make static
+```
+#### result into creating libraries: 
+- static: 
+  - build/static/libsab_winui.a 
+- dynamic: 
+  - build/dynamic/libsab_winui.dll
+  - build/dynamic/libsab_winui.dll.a *<sub>if you want dynamic link use this .a, this is import library for dll not static library! libsab_winui.a != libsab_winui.dll.a </sub>*
+## Download latest release
+### Includes:
+- libsab_winui.a
+- libsab_winui.dll
+- libsab_winui.dll.a
+- headers
+## Use
+### Compile your project:
+```bash
+g++ -o app.exe main.cpp -L<folder_with_libsab_wibui.dll.a> -lsab_winui.dll
+```
+Important *-l flag requires import library from <folder_with_libsab_wibui.dll.a>, so it requires libsab_wibui.dll.a, linker will append .a for you so make -lsab_winui.dll for linker to search sab_winui.dll.a*
+*Example: g++ -o app.exe main.cpp -Llib -lsab_winui.dll*
+### Code integration:
+```
+#include "sab/ui/WindowBase.hpp"
+
+class Gui : private sab::winui::WindowBase {
 public:
-    LRESULT SetupWin(RECT rect, HWND hwnd) override {
+    LRESULT setupWin(RECT rect, HWND hwnd) override {
         ...
         return 0;
     }
-    LRESULT __stdcall Handler(HWND hwnd, UINT msg,
-                              WPARAM  wParam, LPARAM lParam) override {
+    LRESULT Handler(UINT msg, WPARAM  wParam, LPARAM lParam) override {
         ...
-        return DefWindowProcW(hwnd, msg, wParam, lParam);
+        return DefWindowProcW(hWnd_, msg, wParam, lParam);
     }
-    void Show() opverride{
+    void show() opverride{
         ...
     }
 };
 
-int main() {
-    MyGui gui;
-    gui.Show(); // Display the GUI
+int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
+                        LPWSTR lpCmdLine, int nShowCmd){
+    Gui test;
+    test.init(hInstance, lpCmdLine, nShowCmd);
+    RECT wm = {200, 200, 600, 800};
+    test.setupWin(wm);
+    test.dispatch();
+
     return 0;
 }
 ```
 
-[^1]: path for static/libsan_winapi_gui.a, like -Lmyproject/StunAndBlock/WINAPI-GUI-OOP/static/libsan_winapi_gui.a
