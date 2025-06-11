@@ -34,7 +34,7 @@ namespace sab {
         LRESULT __stdcall WindowBase::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             WindowBase* pThis = reinterpret_cast<WindowBase*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
             if (pThis) {
-                return pThis->Handler(msg, wParam,lParam);
+                return pThis->handler(msg, wParam,lParam);
             }
             // should return other value. If pThis is nullptr then this is a problem with pointer recasting, this cannot lead into normal behaviour
             // as it leads in this case.
@@ -47,7 +47,7 @@ namespace sab {
             hWnd_ = NULL;
         }
 
-        void WindowBase::Show(){
+        void WindowBase::show(){
             ShowWindow(hWnd_, SW_SHOW);
             UpdateWindow(hWnd_);
         }
