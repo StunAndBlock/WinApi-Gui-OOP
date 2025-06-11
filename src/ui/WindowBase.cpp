@@ -5,7 +5,7 @@
 namespace sab {
     namespace winui {
 
-        LRESULT WindowBase::Handler(UINT msg,WPARAM wParam, LPARAM lParam){
+        LRESULT WindowBase::handler(UINT msg,WPARAM wParam, LPARAM lParam){
             switch (msg)
             {
             case WM_CREATE:

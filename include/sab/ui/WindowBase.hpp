@@ -15,14 +15,16 @@ namespace sab {
         class SAB_WINUI_LIB WindowBase{
             protected:
                 HWND hWnd_;
-                virtual LRESULT Handler(UINT ,WPARAM, LPARAM );
+                //camelCase my method
+                virtual LRESULT handler(UINT ,WPARAM, LPARAM );
+                //PascalCase WinApi integration callback procedure
                 static LRESULT __stdcall InitProc(HWND, UINT, WPARAM, LPARAM);
                 static LRESULT __stdcall WindowProc(HWND, UINT, WPARAM , LPARAM);
             public:
                 WindowBase();
                 virtual ~WindowBase() = default;
-                virtual void Show();
-                virtual LRESULT SetupWin(RECT, HWND) = 0;
+                virtual void show();
+                virtual LRESULT setupWin(RECT, HWND) = 0;
         };
 
     };
